@@ -98,7 +98,7 @@ const config: HardhatUserConfig = {
     rinkeby: getChainConfig("rinkeby"),
   },
   paths: {
-    artifacts: "./artifacts",
+    artifacts: "./frontend/artifacts",
     cache: "./cache",
     sources: "./contracts",
     tests: "./test",
