@@ -15,8 +15,19 @@ struct Ballot {
     VoteOption[] options;
 }
 
+// The option field could be useful to allow
+// a voter to change their vote in the future
+struct Register {
+    bool voted;
+    uint256 option;
+}
+
 contract Poll {
     Ballot[] public ballots;
+    // Connects the address of a voter
+    // With a mapping of Ballot ids (in uint256)
+    // To the corresponding Register
+    mapping(address => mapping(uint256 => Register)) public registers;
 
     constructor() {
         console.log("Deploying a Pool");
@@ -43,5 +54,26 @@ contract Poll {
                 options: options
             })
         );
+    }
+
+    function vote(uint256 _ballotId, uint256 _optionId) external {
+        require(_ballotId < ballots.length, "Invalid ballot id");
+        require(
+            ballots[_ballotId].deadline < block.timestamp,
+            "This ballot has ended"
+        );
+        require(
+            _optionId < ballots[_ballotId].options.length,
+            "Invalid option"
+        );
+        require(
+            registers[msg.sender][_ballotId].voted == false,
+            "You already voted on this ballot"
+        );
+        registers[msg.sender][_ballotId] = Register({
+            voted: true,
+            option: _optionId
+        });
+        ballots[_ballotId].options[_optionId].voteCount += 1;
     }
 }
