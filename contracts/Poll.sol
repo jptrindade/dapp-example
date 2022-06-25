@@ -12,7 +12,6 @@ struct Ballot {
     address creator;
     string description;
     uint256 deadline;
-    VoteOption[] options;
 }
 
 // The option field could be useful to allow
@@ -29,6 +28,9 @@ contract Poll {
     // To the corresponding Register
     mapping(address => mapping(uint256 => Register)) public registers;
 
+    //Mapping of Ballot ids to the corresponding VoteOptions
+    mapping(uint256 => VoteOption[]) public voteOptions;
+
     constructor() {
         console.log("Deploying a Pool");
     }
@@ -39,19 +41,16 @@ contract Poll {
         uint256 _deadline
     ) external {
         uint256 optionsLength = _options.length;
-        VoteOption[] memory options = new VoteOption[](optionsLength);
         for (uint256 i = 0; i < optionsLength; i++) {
-            options[i] = VoteOption({
-                description: _options[i],
-                voteCount: 0
-            });
+            voteOptions[optionsLength].push(
+                VoteOption({ description: _options[i], voteCount: 0 })
+            );
         }
         ballots.push(
             Ballot({
                 creator: msg.sender,
                 description: _description,
-                deadline: _deadline,
-                options: options
+                deadline: _deadline
             })
         );
     }
@@ -62,10 +61,7 @@ contract Poll {
             ballots[_ballotId].deadline < block.timestamp,
             "This ballot has ended"
         );
-        require(
-            _optionId < ballots[_ballotId].options.length,
-            "Invalid option"
-        );
+        require(_optionId < voteOptions[_ballotId].length, "Invalid option");
         require(
             registers[msg.sender][_ballotId].voted == false,
             "You already voted on this ballot"
@@ -74,6 +70,6 @@ contract Poll {
             voted: true,
             option: _optionId
         });
-        ballots[_ballotId].options[_optionId].voteCount += 1;
+        voteOptions[_ballotId][_optionId].voteCount += 1;
     }
 }
