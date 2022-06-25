@@ -35,14 +35,15 @@ contract Poll {
         console.log("Deploying a Pool");
     }
 
-    function createPoll(
+    function createBallot(
         string calldata _description,
         string[] calldata _options,
         uint256 _deadline
     ) external {
         uint256 optionsLength = _options.length;
+        uint256 ballotsLength = ballots.length;
         for (uint256 i = 0; i < optionsLength; i++) {
-            voteOptions[optionsLength].push(
+            voteOptions[ballotsLength].push(
                 VoteOption({ description: _options[i], voteCount: 0 })
             );
         }
