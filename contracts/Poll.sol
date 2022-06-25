@@ -51,7 +51,7 @@ contract Poll {
             Ballot({
                 creator: msg.sender,
                 description: _description,
-                deadline: _deadline
+                deadline: _deadline + block.timestamp
             })
         );
     }
@@ -59,7 +59,7 @@ contract Poll {
     function vote(uint256 _ballotId, uint256 _optionId) external {
         require(_ballotId < ballots.length, "Invalid ballot id");
         require(
-            ballots[_ballotId].deadline < block.timestamp,
+            ballots[_ballotId].deadline > block.timestamp,
             "This ballot has ended"
         );
         require(_optionId < voteOptions[_ballotId].length, "Invalid option");
