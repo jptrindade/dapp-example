@@ -73,4 +73,16 @@ contract Poll {
         });
         voteOptions[_ballotId][_optionId].voteCount += 1;
     }
+
+    function getBallots() external view returns (Ballot[] memory) {
+        return ballots;
+    }
+
+    function getVoteOptions(uint256 _ballotId)
+        external
+        view
+        returns (VoteOption[] memory)
+    {
+        return voteOptions[_ballotId];
+    }
 }
