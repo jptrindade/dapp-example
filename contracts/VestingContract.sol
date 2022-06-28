@@ -41,7 +41,7 @@ contract VestingContract is Ownable, ReentrancyGuard {
      * @param tokenAddress address of the ERC20 token contract
      */
     constructor(address tokenAddress) {
-        require(tokenAddress != address(0x0));
+        require(tokenAddress != address(0x0), "Token address invalid");
         _token = IERC20(tokenAddress);
     }
 
@@ -50,6 +50,13 @@ contract VestingContract is Ownable, ReentrancyGuard {
      */
     function getAvailableAmount() public view returns (uint256) {
         return _token.balanceOf(address(this)).sub(vestingSchedulesTotalAmount);
+    }
+
+    /**
+     * @dev Returns the amount of tokens that can be vested.
+     */
+    function getVestingSchedule(address receiverAddress) public view returns (VestingSchedule memory) {
+        return vestingSchedules[receiverAddress];
     }
 
     /**
@@ -79,12 +86,9 @@ contract VestingContract is Ownable, ReentrancyGuard {
         uint256 _start,
         uint256 _amount
     ) public onlyOwner nonReentrant {
-        require(
-            getAvailableAmount() >= _amount,
-            "VestingContract: cannot create vesting schedule because not sufficient tokens"
-        );
-        require(vestingSchedules[_receiver].total == 0, "VestingContract: This receiver already has a VestingSchedule");
-        require(_amount > 0, "VestingContract: amount must be > 0");
+        require(getAvailableAmount() >= _amount, "Not enough available tokens in contract");
+        require(vestingSchedules[_receiver].total == 0, "This receiver already has a VestingSchedule");
+        require(_amount > 0, "Amount must be > 0");
 
         vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.add(_amount);
         vestingSchedules[_receiver] = VestingSchedule(_receiver, _start, _amount, 0);
@@ -98,12 +102,9 @@ contract VestingContract is Ownable, ReentrancyGuard {
         VestingSchedule storage vestingSchedule = vestingSchedules[receiver];
         bool isreceiver = msg.sender == vestingSchedule.receiver;
         bool isOwner = msg.sender == owner();
-        require(isreceiver || isOwner, "VestingContract: only receiver and owner can release vested tokens");
-        require(block.timestamp > vestingSchedule.start, "VestingContract: Vesting period has not started yet");
-        require(
-            vestingSchedule.released < vestingSchedule.total,
-            "VestingContract: All tokens have been released already"
-        );
+        require(isreceiver || isOwner, "Only receiver and owner can release vested tokens");
+        require(block.timestamp > vestingSchedule.start, "Vesting period has not started yet");
+        require(vestingSchedule.released < vestingSchedule.total, "All tokens have been released already");
         uint256 amountToRelease = _getAmountToRelease(vestingSchedule);
         vestingSchedule.released = vestingSchedule.released.add(amountToRelease);
         vestingSchedulesTotalAmount = vestingSchedulesTotalAmount.sub(amountToRelease);
