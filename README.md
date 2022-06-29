@@ -17,7 +17,12 @@ Every 3 months after the timestamp, the owner or the receiver can call the `rele
 
 A few tests were developed detailing specific use cases and exceptions that might occur, if you want to run the tests follow the steps below.
 
-### Pre Requisites
+## Pre Requisites
+
+This creates a copy of .env to ensure the necessary environment variables are set:
+```sh
+cp .env.example .env
+```
 
 Install packages:
 
