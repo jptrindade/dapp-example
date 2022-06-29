@@ -53,7 +53,7 @@ contract VestingContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Returns the amount of tokens that can be vested.
+     * @dev Returns the vesting schedule for a given address.
      */
     function getVestingSchedule(address receiverAddress) public view returns (VestingSchedule memory) {
         return vestingSchedules[receiverAddress];
